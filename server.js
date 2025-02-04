@@ -13,7 +13,7 @@ app.use(
     origin: [
       "https://www.goodgutproject.in",
       "https://goodgutproject.in",
-      "http://localhost:3000",
+      "http://localhost:3001",
       "https://admindashboard-nu-lovat.vercel.app",
     ],
   })
@@ -24,7 +24,7 @@ app.options("*", (req, res) => {
   const allowedOrigins = [
     "https://www.goodgutproject.in",
     "https://goodgutproject.in",
-    "http://localhost:3000",
+    "http://localhost:3001",
     "https://admindashboard-nu-lovat.vercel.app",
   ];
   const origin = req.headers.origin;
