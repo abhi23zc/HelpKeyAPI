@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Email Template</title>
+  </head>
+  <body style="background-color: #854bbb; padding: 15px; color: white">
+    <img
+      src="https://helpkey.in/wp-content/uploads/2023/08/cropped-1691129996629-63x62.png"
+      alt="Welcome Image"
+      style="width: 100px"
+    />
+    <div style="padding-left: 17px">
+      <h1 style="margin-top: 0px">Welcome! to HelpKey</h1>
+      <div style="font-size: 120%">
+        <p>Hi {{name}},</p>
+
+        <p>Thank you for signing up! We’re glad to have you with us.</p>
+
+        <p style="padding-top: 20px; color: white">
+          Please click on below button to activate your account
+        </p>
+
+        <a href="/verify-user?token={{token}}"
+          ><button
+            style="
+              padding: 15px;
+              background-color: #6000b9;
+              color: white;
+              font-size: 15px;
+              font-weight: bold;
+            "
+          >
+            Activate Your Account
+          </button></a
+        >
+
+        <p><strong>Best regards,</strong></p>
+        <p><strong>HelpKey India</strong></p>
+      </div>
+    </div>
+  </body>
+</html>
