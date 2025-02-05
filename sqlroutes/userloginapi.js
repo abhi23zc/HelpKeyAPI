@@ -330,4 +330,20 @@ router.get("/version", cors, async (req, res) => {
   }
 });
 
+router.get("/authuser", cors, async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(200).json({ isAuthenticated: false });
+  }
+
+  try {
+    const decoded = jwt.verify(token, ggpKey);
+    res.status(200).json({ isAuthenticated: true });
+    next();
+  } catch (error) {
+    res.status(200).json({ isAuthenticated: false });
+  }
+});
+
 module.exports = router;
