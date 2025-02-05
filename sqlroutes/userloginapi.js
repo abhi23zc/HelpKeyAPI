@@ -19,7 +19,7 @@ router.post("/signup", async (req, res) => {
     // Ensure that name, email, and password are provided
     if (!name || !email || !password) {
       return res
-        .status(400)
+        .status(200)
         .json({ error: "Name, email, and password are required" });
     }
 
@@ -27,10 +27,12 @@ router.post("/signup", async (req, res) => {
     db.execute(getQuery, [email], (err, results) => {
       if (err) {
         console.error("Error fetching users:", err);
-        return res.status(500).json({ error: "Database error" });
+        return res
+          .status(200)
+          .json({ error: "Something Went Wrong ! Please try after some time" });
       }
       if (results.length > 0) {
-        return res.status(400).json({ error: "User Already Registred" });
+        return res.status(200).json({ error: "User Already Registred" });
       }
     });
     const signupdate = new Date(); // Current timestamp
@@ -45,7 +47,9 @@ router.post("/signup", async (req, res) => {
       async (err, result) => {
         if (err) {
           await logger("Error inserting data:" + err + "Time:-" + signupdate);
-          return res.status(500).json({ error: "Database error" });
+          return res.status(200).json({
+            error: "Something Went Wrong ! Please try after some time",
+          });
         } else {
           const updateQuery =
             "UPDATE UserLogins SET auth_token = ? WHERE id = ?";
@@ -59,7 +63,7 @@ router.post("/signup", async (req, res) => {
               if (err) throw err;
               db.execute(updateQuery, [token, id], async (error, result) => {
                 if (error) {
-                  res.status(500).json({ msg: "Error in creating token" });
+                  res.status(200).json({ msg: "Error in creating token" });
                 } else {
                   await sendEmail(
                     email,
@@ -82,7 +86,9 @@ router.post("/signup", async (req, res) => {
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Server error" });
+    res
+      .status(200)
+      .json({ msg: "Something Went Wrong ! Please try after some time" });
   }
 });
 
@@ -106,23 +112,25 @@ router.post("/login", cors, async (req, res) => {
     db.execute(query, [email], async (err, results) => {
       if (err) {
         console.error("Error fetching users:", err);
-        return res.status(500).json({ error: "Database error " + err });
+        return res
+          .status(200)
+          .json({ error: "Something Went Wrong ! Please try after some time" });
       }
 
       if (results.length == 0) {
         return res
-          .status(404)
+          .status(200)
           .json({ msg: "No account found with this email" });
       }
 
       // Check password
       const isMatch = await bcrypt.compare(password, results[0]?.password);
       if (!isMatch) {
-        return res.status(401).json({ msg: "Invalid Credentials" });
+        return res.status(200).json({ error: "Invalid Credentials" });
       }
 
       if (results[0].isActive == 0) {
-        return res.status(403).json({ msg: "Please activate your account" });
+        return res.status(200).json({ error: "Please activate your account" });
       }
 
       //Create JWT token
@@ -139,7 +147,9 @@ router.post("/login", cors, async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Server error" });
+    res
+      .status(200)
+      .json({ msg: "Something Went Wrong ! Please try after some time" });
   }
 });
 
