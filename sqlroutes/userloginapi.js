@@ -330,7 +330,7 @@ router.get("/version", cors, async (req, res) => {
   }
 });
 
-router.post("/authuser", cors, async (req, res) => {
+router.post("/authuser", async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
