@@ -339,8 +339,12 @@ router.post("/authuser", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, ggpKey);
-    res.status(200).json({ isAuthenticated: true });
-    next();
+    console.log(decoded?.user?.id);
+    if (decoded?.user?.id > 0) {
+      res.status(200).json({ isAuthenticated: true });
+    } else {
+      res.status(200).json({ isAuthenticated: false });
+    }
   } catch (error) {
     res.status(200).json({ isAuthenticated: false });
   }
