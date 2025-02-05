@@ -112,25 +112,32 @@ router.post("/login", cors, async (req, res) => {
     db.execute(query, [email], async (err, results) => {
       if (err) {
         console.error("Error fetching users:", err);
-        return res
-          .status(200)
-          .json({ error: "Something Went Wrong ! Please try after some time" });
+        return res.status(200).json({
+          error: "Something Went Wrong ! Please try after some time",
+          isAuthenticated: false,
+        });
       }
 
       if (results.length == 0) {
-        return res
-          .status(200)
-          .json({ msg: "No account found with this email" });
+        return res.status(200).json({
+          msg: "No account found with this email",
+          isAuthenticated: false,
+        });
       }
 
       // Check password
       const isMatch = await bcrypt.compare(password, results[0]?.password);
       if (!isMatch) {
-        return res.status(200).json({ error: "Invalid Credentials" });
+        return res
+          .status(200)
+          .json({ error: "Invalid Credentials", isAuthenticated: false });
       }
 
       if (results[0].isActive == 0) {
-        return res.status(200).json({ error: "Please activate your account" });
+        return res.status(200).json({
+          error: "Please activate your account",
+          isAuthenticated: false,
+        });
       }
 
       //Create JWT token
@@ -141,15 +148,16 @@ router.post("/login", cors, async (req, res) => {
         { expiresIn: "10h" },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ token, isAuthenticated: true });
         }
       );
     });
   } catch (err) {
     console.error(err.message);
-    res
-      .status(200)
-      .json({ msg: "Something Went Wrong ! Please try after some time" });
+    res.status(200).json({
+      msg: "Something Went Wrong ! Please try after some time",
+      isAuthenticated: false,
+    });
   }
 });
 
