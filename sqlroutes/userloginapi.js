@@ -52,7 +52,7 @@ router.post("/signup", async (req, res) => {
           });
         } else {
           const updateQuery =
-            "UPDATE UserLogins SET auth_token = ? WHERE id = ?";
+            "UPDATE UserLogins SET auth_token = 1 WHERE id = ?";
           const id = result.insertId;
           const payload = { user: { id: id } };
           jwt.sign(
@@ -61,7 +61,7 @@ router.post("/signup", async (req, res) => {
             { expiresIn: "10h" },
             (err, token) => {
               if (err) throw err;
-              db.execute(updateQuery, [token, id], async (error, result) => {
+              db.execute(updateQuery, [id], async (error, result) => {
                 if (error) {
                   res.status(200).json({ msg: "Error in creating token" });
                 } else {
