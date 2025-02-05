@@ -14,6 +14,7 @@ app.use(
       "https://www.goodgutproject.in",
       "https://goodgutproject.in",
       "http://localhost:3001",
+      "http://localhost:3000",
       "https://admindashboard-nu-lovat.vercel.app",
     ],
   })
@@ -25,6 +26,7 @@ app.options("*", (req, res) => {
     "https://www.goodgutproject.in",
     "https://goodgutproject.in",
     "http://localhost:3001",
+    "http://localhost:3000",
     "https://admindashboard-nu-lovat.vercel.app",
   ];
   const origin = req.headers.origin;
