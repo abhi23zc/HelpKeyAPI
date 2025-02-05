@@ -16,6 +16,7 @@ app.use(
       "http://localhost:3001",
       "http://localhost:3000",
       "https://admindashboard-nu-lovat.vercel.app",
+      "https://helpkeywebapp.vercel.app",
     ],
   })
 );
@@ -28,6 +29,7 @@ app.options("*", (req, res) => {
     "http://localhost:3001",
     "http://localhost:3000",
     "https://admindashboard-nu-lovat.vercel.app",
+    "https://helpkeywebapp.vercel.app",
   ];
   const origin = req.headers.origin;
 
