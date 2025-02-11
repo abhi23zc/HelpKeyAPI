@@ -65,12 +65,7 @@ router.post("/signup", async (req, res) => {
                 if (error) {
                   res.status(200).json({ msg: "Error in creating token" });
                 } else {
-                  await sendEmail(
-                    email,
-                    "Welcome To Good Gut Family !",
-                    name,
-                    token
-                  );
+                  await sendEmail(email, "Welcome To HelpKey !", name, token);
                   await logger(
                     `\n New User has been registered with mail:- ${email} , Time:-${signupdate}`
                   );

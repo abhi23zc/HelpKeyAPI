@@ -1,3 +1,3 @@
 const subject = {
-  signup: "Welcome To Good Gut Family !",
+  signup: "Welcome To HelpKey !",
 };

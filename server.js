@@ -11,8 +11,6 @@ const cors = require("cors");
 app.use(
   cors({
     origin: [
-      "https://www.goodgutproject.in",
-      "https://goodgutproject.in",
       "http://localhost:3001",
       "http://localhost:3000",
       "https://admindashboard-nu-lovat.vercel.app",
@@ -24,8 +22,6 @@ app.use(
 // Handle preflight requests (OPTIONS)
 app.options("*", (req, res) => {
   const allowedOrigins = [
-    "https://www.goodgutproject.in",
-    "https://goodgutproject.in",
     "http://localhost:3001",
     "http://localhost:3000",
     "https://admindashboard-nu-lovat.vercel.app",
