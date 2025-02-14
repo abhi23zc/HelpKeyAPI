@@ -158,10 +158,12 @@ router.post("/login", cors, async (req, res) => {
 
 router.post("/userdata", auth, (req, res) => {
   const userID = req?.userInfo?.user?.id;
+  // console.log(userID)
 
   const newQuery = "SELECT * FROM UserData WHERE userId = ?";
   db.execute(newQuery, [userID], (error, result) => {
     if (error) {
+      console.log(error);
       return res.status(500).json({ msg: "Database Error" });
     }
 
@@ -344,5 +346,66 @@ router.post("/authuser", async (req, res) => {
     res.status(200).json({ isAuthenticated: false });
   }
 });
+
+
+router.get("/nearby-vendors", async (req, res) => {
+  try {
+    // const userID = 6;
+    const userID = req?.userInfo?.user?.id;
+
+    if (!userID) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Fetch user's location 
+    const userQuery = "SELECT latitude, longitude FROM users WHERE id = ?";
+    db.execute(userQuery, [userID], (err, userResult) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (userResult.length === 0) {
+        return res.status(404).json({ error: "User location not found" });
+      }
+
+      const { latitude, longitude } = userResult[0];
+
+      if (!latitude || !longitude) {
+        return res.status(400).json({ error: "User location is incomplete" });
+      }
+
+
+      // Default Radius for fetching vendors
+      const radius = 5; // 5km
+
+      const your_lat = latitude;
+      const your_lon = longitude;
+
+      const vendorQuery = `SELECT id,
+    (6371 * ACOS(
+        COS(RADIANS(${your_lat})) * COS(RADIANS(latitude)) *
+        COS(RADIANS(longitude) - RADIANS(${your_lon})) +
+        SIN(RADIANS(${your_lat})) * SIN(RADIANS(latitude))
+    )) AS distance
+FROM vendorservice
+HAVING distance <= ${radius}
+ORDER BY distance;`
+
+      db.execute(vendorQuery, [latitude, longitude, latitude, radius], (vendorErr, vendorResult) => {
+        if (vendorErr) {
+          console.error("Error fetching vendors:", vendorErr);
+          return res.status(500).json({ error: "Database error" });
+        }
+
+        res.status(200).json({ vendors: vendorResult });
+      });
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

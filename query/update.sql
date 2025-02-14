@@ -1,0 +1,1 @@
+UPDATE UserLogins SET isActive = 1 WHERE email="admin@gmail.com";
