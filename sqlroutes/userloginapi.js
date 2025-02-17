@@ -348,41 +348,23 @@ router.post("/authuser", async (req, res) => {
 });
 
 
+// Route for Fetching nearby vendors
 router.get("/nearby-vendors", async (req, res) => {
   try {
-    // const userID = 6;
-    const userID = req?.userInfo?.user?.id;
 
-    if (!userID) {
-      return res.status(400).json({ error: "User ID is required" });
+    const { latitude, longitude } = req.query;
+    if (!latitude || !longitude) {
+      console.error("Error fetching location");
+      return res.status(500).json({ error: "Internal server error" });
     }
 
-    // Fetch user's location 
-    const userQuery = "SELECT latitude, longitude FROM users WHERE id = ?";
-    db.execute(userQuery, [userID], (err, userResult) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: "Database error" });
-      }
+    // Default Radius for fetching vendors
+    const radius = 10; // 5km
 
-      if (userResult.length === 0) {
-        return res.status(404).json({ error: "User location not found" });
-      }
+    const your_lat = latitude;
+    const your_lon = longitude;
 
-      const { latitude, longitude } = userResult[0];
-
-      if (!latitude || !longitude) {
-        return res.status(400).json({ error: "User location is incomplete" });
-      }
-
-
-      // Default Radius for fetching vendors
-      const radius = 5; // 5km
-
-      const your_lat = latitude;
-      const your_lon = longitude;
-
-      const vendorQuery = `SELECT id,
+    const vendorQuery = `SELECT *,
     (6371 * ACOS(
         COS(RADIANS(${your_lat})) * COS(RADIANS(latitude)) *
         COS(RADIANS(longitude) - RADIANS(${your_lon})) +
@@ -392,14 +374,13 @@ FROM vendorservice
 HAVING distance <= ${radius}
 ORDER BY distance;`
 
-      db.execute(vendorQuery, [latitude, longitude, latitude, radius], (vendorErr, vendorResult) => {
-        if (vendorErr) {
-          console.error("Error fetching vendors:", vendorErr);
-          return res.status(500).json({ error: "Database error" });
-        }
+    db.execute(vendorQuery, [latitude, longitude, latitude, radius], (vendorErr, vendorResult) => {
+      if (vendorErr) {
+        console.error("Error fetching vendors:", vendorErr);
+        return res.status(500).json({ error: "Database error" });
+      }
 
-        res.status(200).json({ vendors: vendorResult });
-      });
+      res.status(200).json({ vendors: vendorResult });
     });
   } catch (error) {
     console.error("Server error:", error);
@@ -408,4 +389,7 @@ ORDER BY distance;`
 });
 
 
+// Route for search by city
+
 module.exports = router;
+
