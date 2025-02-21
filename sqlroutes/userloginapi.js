@@ -368,7 +368,7 @@ router.post("/nearby-vendors", async (req, res) => {
         COS(RADIANS(longitude) - RADIANS(${your_lon})) +
         SIN(RADIANS(${your_lat})) * SIN(RADIANS(latitude))
     )) AS distance
-FROM vendorservice WHERE category = propertyType
+FROM vendorservice WHERE category = ${propertyType}
 HAVING distance <= ${radius}
 ORDER BY distance;`;
 
