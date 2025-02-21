@@ -401,7 +401,7 @@ router.get("/fetch-by-city", async (req, res) => {
 
     const vendorQuery = `
       SELECT * FROM vendorservice 
-      WHERE address LIKE ?`;
+      WHERE category = 25 AND address LIKE ?`;
 
     db.execute(vendorQuery, [`%${city}%`], (vendorErr, vendorResult) => {
       if (vendorErr) {
