@@ -347,11 +347,9 @@ router.post("/authuser", async (req, res) => {
   }
 });
 
-
 // Route for Fetching nearby vendors
 router.get("/nearby-vendors", async (req, res) => {
   try {
-
     const { latitude, longitude } = req.query;
     if (!latitude || !longitude) {
       console.error("Error fetching location");
@@ -370,24 +368,27 @@ router.get("/nearby-vendors", async (req, res) => {
         COS(RADIANS(longitude) - RADIANS(${your_lon})) +
         SIN(RADIANS(${your_lat})) * SIN(RADIANS(latitude))
     )) AS distance
-FROM vendorservice
+FROM vendorservice WHERE category = 25
 HAVING distance <= ${radius}
-ORDER BY distance;`
+ORDER BY distance;`;
 
-    db.execute(vendorQuery, [latitude, longitude, latitude, radius], (vendorErr, vendorResult) => {
-      if (vendorErr) {
-        console.error("Error fetching vendors:", vendorErr);
-        return res.status(500).json({ error: "Database error" });
+    db.execute(
+      vendorQuery,
+      [latitude, longitude, latitude, radius],
+      (vendorErr, vendorResult) => {
+        if (vendorErr) {
+          console.error("Error fetching vendors:", vendorErr);
+          return res.status(500).json({ error: "Database error" });
+        }
+
+        res.status(200).json({ vendors: vendorResult });
       }
-
-      res.status(200).json({ vendors: vendorResult });
-    });
+    );
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // Route for search by city
 router.get("/fetch-by-city", async (req, res) => {
@@ -409,12 +410,13 @@ router.get("/fetch-by-city", async (req, res) => {
       }
 
       if (vendorResult.length === 0) {
-        return res.status(404).json({ message: "No vendors found for this city" });
+        return res
+          .status(404)
+          .json({ message: "No vendors found for this city" });
       }
 
       res.status(200).json({ vendors: vendorResult });
     });
-
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -422,4 +424,3 @@ router.get("/fetch-by-city", async (req, res) => {
 });
 
 module.exports = router;
-
