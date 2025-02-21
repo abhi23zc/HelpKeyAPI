@@ -348,9 +348,9 @@ router.post("/authuser", async (req, res) => {
 });
 
 // Route for Fetching nearby vendors
-router.get("/nearby-vendors", async (req, res) => {
+router.post("/nearby-vendors", async (req, res) => {
   try {
-    const { latitude, longitude } = req.query;
+    const { latitude, longitude, propertyType } = req.body;
     if (!latitude || !longitude) {
       console.error("Error fetching location");
       return res.status(500).json({ error: "Internal server error" });
@@ -368,13 +368,13 @@ router.get("/nearby-vendors", async (req, res) => {
         COS(RADIANS(longitude) - RADIANS(${your_lon})) +
         SIN(RADIANS(${your_lat})) * SIN(RADIANS(latitude))
     )) AS distance
-FROM vendorservice WHERE category = 25
+FROM vendorservice WHERE category = propertyType
 HAVING distance <= ${radius}
 ORDER BY distance;`;
 
     db.execute(
       vendorQuery,
-      [latitude, longitude, latitude, radius],
+      [latitude, longitude, latitude, propertyType, radius],
       (vendorErr, vendorResult) => {
         if (vendorErr) {
           console.error("Error fetching vendors:", vendorErr);
@@ -393,7 +393,7 @@ ORDER BY distance;`;
 // Route for search by city
 router.get("/fetch-by-city", async (req, res) => {
   try {
-    const { city } = req.query;
+    const { city, propertyType } = req.query;
 
     if (!city) {
       return res.status(400).json({ error: "City parameter is required" });
@@ -401,22 +401,26 @@ router.get("/fetch-by-city", async (req, res) => {
 
     const vendorQuery = `
       SELECT * FROM vendorservice 
-      WHERE category = 25 AND address LIKE ?`;
+      WHERE category = ? AND address LIKE ?`;
 
-    db.execute(vendorQuery, [`%${city}%`], (vendorErr, vendorResult) => {
-      if (vendorErr) {
-        console.error("Error fetching vendors:", vendorErr);
-        return res.status(500).json({ error: "Database error" });
+    db.execute(
+      vendorQuery,
+      [`%${city}%`, propertyType],
+      (vendorErr, vendorResult) => {
+        if (vendorErr) {
+          console.error("Error fetching vendors:", vendorErr);
+          return res.status(500).json({ error: "Database error" });
+        }
+
+        if (vendorResult.length === 0) {
+          return res
+            .status(404)
+            .json({ message: "No vendors found for this city" });
+        }
+
+        res.status(200).json({ vendors: vendorResult });
       }
-
-      if (vendorResult.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No vendors found for this city" });
-      }
-
-      res.status(200).json({ vendors: vendorResult });
-    });
+    );
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ error: "Internal server error" });
