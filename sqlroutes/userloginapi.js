@@ -349,20 +349,50 @@ router.post("/authuser", async (req, res) => {
 
 // Route for Fetching nearby vendors
 router.post("/nearby-vendors", async (req, res) => {
-  try {
-    const { latitude, longitude, propertyType } = req.body;
-    if (!latitude || !longitude) {
-      console.error("Error fetching location");
-      return res.status(500).json({ error: "Internal server error" });
+  const { latitude, longitude, propertyType, city } = req.body;
+  console.log(latitude, longitude, propertyType, city);
+  if (city) {
+    try {
+      const vendorQuery = `
+    SELECT * FROM vendorservice 
+    WHERE address LIKE ? AND category = ?`;
+
+      db.execute(
+        vendorQuery,
+        [`%${city}%`, propertyType],
+        (vendorErr, vendorResult) => {
+          if (vendorErr) {
+            console.error("Error fetching vendors:", vendorErr);
+            return res.status(500).json({ error: "Database error" });
+          }
+
+          if (vendorResult.length === 0) {
+            return res
+              .status(404)
+              .json({ message: "No vendors found for this city" });
+          }
+
+          res.status(200).json({ vendors: vendorResult });
+        }
+      );
+    } catch (error) {
+      console.error("Server error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
+  } else {
+    try {
+      if (!latitude || !longitude) {
+        console.error("Error fetching location");
+        return res.status(500).json({ error: "Internal server error" });
+      }
 
-    // Default Radius for fetching vendors
-    const radius = 10; // 5km
+      // Default Radius for fetching vendors
+      const radius = 10; // 5km
 
-    const your_lat = latitude;
-    const your_lon = longitude;
+      const your_lat = latitude;
+      const your_lon = longitude;
 
-    const vendorQuery = `SELECT *,
+      const vendorQuery = `SELECT *,
     (6371 * ACOS(
         COS(RADIANS(${your_lat})) * COS(RADIANS(latitude)) *
         COS(RADIANS(longitude) - RADIANS(${your_lon})) +
@@ -372,21 +402,22 @@ FROM vendorservice WHERE category = ${propertyType}
 HAVING distance <= ${radius}
 ORDER BY distance;`;
 
-    db.execute(
-      vendorQuery,
-      [latitude, longitude, latitude, radius],
-      (vendorErr, vendorResult) => {
-        if (vendorErr) {
-          console.error("Error fetching vendors:", vendorErr);
-          return res.status(500).json({ error: "Database error" });
-        }
+      db.execute(
+        vendorQuery,
+        [latitude, longitude, latitude, radius],
+        (vendorErr, vendorResult) => {
+          if (vendorErr) {
+            console.error("Error fetching vendors:", vendorErr);
+            return res.status(500).json({ error: "Database error" });
+          }
 
-        res.status(200).json({ vendors: vendorResult });
-      }
-    );
-  } catch (error) {
-    console.error("Server error:", error);
-    res.status(500).json({ error: "Internal server error" });
+          res.status(200).json({ vendors: vendorResult });
+        }
+      );
+    } catch (error) {
+      console.error("Server error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 });
 
