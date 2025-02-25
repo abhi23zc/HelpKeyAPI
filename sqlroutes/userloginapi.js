@@ -422,36 +422,32 @@ ORDER BY distance;`;
 });
 
 // Route for search by city
-router.get("/fetch-by-city", async (req, res) => {
+router.get("/vendor-by-id", async (req, res) => {
   try {
-    const { city, propertyType } = req.query;
+    const { id } = req.query;
 
-    if (!city) {
+    if (!id) {
       return res.status(400).json({ error: "City parameter is required" });
     }
 
     const vendorQuery = `
       SELECT * FROM vendorservice 
-      WHERE category = 25 AND address LIKE ?`;
+      WHERE id = ?`;
 
-    db.execute(
-      vendorQuery,
-      [`%${city}%`, propertyType],
-      (vendorErr, vendorResult) => {
-        if (vendorErr) {
-          console.error("Error fetching vendors:", vendorErr);
-          return res.status(500).json({ error: "Database error" });
-        }
-
-        if (vendorResult.length === 0) {
-          return res
-            .status(404)
-            .json({ message: "No vendors found for this city" });
-        }
-
-        res.status(200).json({ vendors: vendorResult });
+    db.execute(vendorQuery, [id], (vendorErr, vendorResult) => {
+      if (vendorErr) {
+        console.error("Error fetching vendors:", vendorErr);
+        return res.status(500).json({ error: "Database error" });
       }
-    );
+
+      if (vendorResult.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No vendors found for this city" });
+      }
+
+      res.status(200).json({ vendors: vendorResult });
+    });
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ error: "Internal server error" });
